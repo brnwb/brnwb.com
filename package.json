@@ -1,0 +1,13 @@
+{
+  "name": "brnwb.com",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "blargh --in src --out html",
+    "dev": "blargh --in src --out html --watch --serve 8080"
+  },
+  "devDependencies": {
+    "@mariozechner/blargh": "^0.0.26"
+  }
+}
