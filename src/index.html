@@ -4,6 +4,54 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Brian Webb</title>
+    <script>
+      (() => {
+        const storageKey = "theme";
+        const root = document.documentElement;
+
+        const getStoredTheme = () => localStorage.getItem(storageKey) || "system";
+        const getSystemTheme = () =>
+          window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+
+        const applyTheme = (storedTheme) => {
+          root.dataset.theme = storedTheme === "system" ? getSystemTheme() : storedTheme;
+        };
+
+        // Apply theme as early as possible to avoid flash.
+        applyTheme(getStoredTheme());
+
+        document.addEventListener("DOMContentLoaded", () => {
+          const selector = document.querySelector(".theme-selector");
+          const currentTheme = getStoredTheme();
+
+          if (selector) {
+            selector.removeAttribute("hidden");
+            document.querySelectorAll('input[name="theme"]').forEach((input) => {
+              input.checked = input.value === currentTheme;
+              input.addEventListener("change", () => {
+                if (input.value === "system") {
+                  localStorage.removeItem(storageKey);
+                } else {
+                  localStorage.setItem(storageKey, input.value);
+                }
+                applyTheme(getStoredTheme());
+              });
+            });
+          }
+
+          if (window.matchMedia) {
+            const media = window.matchMedia("(prefers-color-scheme: dark)");
+            media.addEventListener("change", () => {
+              if (getStoredTheme() === "system") {
+                applyTheme("system");
+              }
+            });
+          }
+        });
+      })();
+    </script>
     <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
   <body>
@@ -35,55 +83,5 @@
         <label><input type="radio" name="theme" value="dark" /> <span>dark</span></label>.
       </p>
     </footer>
-
-    <script>
-      (() => {
-        const storageKey = "theme";
-        const root = document.documentElement;
-
-        const prefersDark = () =>
-          window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-        const applyTheme = (theme) => {
-          if (theme === "system") {
-            root.removeAttribute("data-theme");
-            return;
-          }
-          root.dataset.theme = theme;
-        };
-
-        const storedTheme = localStorage.getItem(storageKey) || "system";
-        applyTheme(storedTheme);
-
-        window.toggleTheme = () => {
-          const current = root.dataset.theme === "dark" ? "dark" : "light";
-          const next = current === "dark" ? "light" : "dark";
-          root.dataset.theme = next;
-          localStorage.setItem(storageKey, next);
-          return next;
-        };
-
-        const selector = document.querySelector(".theme-selector");
-        if (selector) {
-          selector.removeAttribute("hidden");
-          document.querySelectorAll('input[name="theme"]').forEach((input) => {
-            input.checked = input.value === storedTheme;
-            input.addEventListener("change", () => {
-              localStorage.setItem(storageKey, input.value);
-              applyTheme(input.value);
-            });
-          });
-        }
-
-        if (storedTheme === "system" && window.matchMedia) {
-          const media = window.matchMedia("(prefers-color-scheme: dark)");
-          media.addEventListener("change", (event) => {
-            if ((localStorage.getItem(storageKey) || "system") === "system") {
-              applyTheme(event.matches ? "dark" : "light");
-            }
-          });
-        }
-      })();
-    </script>
   </body>
 </html>
