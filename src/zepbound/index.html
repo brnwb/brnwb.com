@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zepbound Weight Chart</title>
-    <script src='{{ asset "theme-switcher.js" }}'></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
     <style>
       :root {
         color-scheme: light dark;
@@ -222,6 +222,232 @@
       </div>
     </div>
 
-    <script src='{{ asset "zepbound/chart.js" }}'></script>
+    <script>
+      const themeStorageKey = "zepbound-theme";
+      const themeSelect = document.querySelector("#theme-select");
+      const systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+      const getSavedTheme = () => {
+        const value = localStorage.getItem(themeStorageKey);
+        return value === "light" || value === "dark" || value === "system" ? value : "system";
+      };
+
+      const resolveTheme = (theme) =>
+        theme === "system" ? (systemThemeQuery.matches ? "dark" : "light") : theme;
+
+      const applyTheme = (theme) => {
+        document.documentElement.setAttribute("data-theme", resolveTheme(theme));
+      };
+
+      let themePreference = getSavedTheme();
+      themeSelect.value = themePreference;
+      applyTheme(themePreference);
+
+      themeSelect.addEventListener("change", () => {
+        themePreference = themeSelect.value;
+        localStorage.setItem(themeStorageKey, themePreference);
+        applyTheme(themePreference);
+      });
+
+      systemThemeQuery.addEventListener("change", () => {
+        if (themePreference === "system") {
+          applyTheme("system");
+        }
+      });
+
+      const parseDate = d3.timeParse("%Y-%m-%d");
+      const formatDate = d3.timeFormat("%b %-d");
+      const formatTooltipDate = d3.timeFormat("%A, %b %-d, %Y");
+      const formatWeight = d3.format(".1f");
+
+      const rawRows = [
+        { date: "2026-01-11", weight_lbs: null, injection_date: "2026-01-11", dose: "2.5mg" },
+        { date: "2026-01-12", weight_lbs: "165.6" },
+        { date: "2026-01-14", weight_lbs: "162.7" },
+        { date: "2026-01-15", weight_lbs: "162.5" },
+        { date: "2026-01-16", weight_lbs: "161.8" },
+        { date: "2026-01-17", weight_lbs: "162.0" },
+        { date: "2026-01-18", weight_lbs: "162.7", injection_date: "2026-01-18", dose: "2.5mg" },
+        { date: "2026-01-19", weight_lbs: "163.1" },
+        { date: "2026-01-20", weight_lbs: "161.6" },
+        { date: "2026-01-23", weight_lbs: "160.1" },
+        { date: "2026-01-24", weight_lbs: "160.5" },
+        { date: "2026-01-25", weight_lbs: "160.3", injection_date: "2026-01-25", dose: "2.5mg" },
+        { date: "2026-01-26", weight_lbs: "161.2" },
+        { date: "2026-01-27", weight_lbs: "160.3" },
+        { date: "2026-01-28", weight_lbs: "160.5" },
+        { date: "2026-01-29", weight_lbs: "159.6" },
+        { date: "2026-01-30", weight_lbs: "159.6" },
+        { date: "2026-01-31", weight_lbs: "158.7" },
+        { date: "2026-02-01", weight_lbs: "160.1", injection_date: "2026-02-01", dose: "2.5mg" },
+        { date: "2026-02-02", weight_lbs: "160.9" },
+        { date: "2026-02-03", weight_lbs: "160.5" },
+        { date: "2026-02-04", weight_lbs: "159.0" },
+        { date: "2026-02-05", weight_lbs: "158.3" },
+        { date: "2026-02-06", weight_lbs: "158.7" },
+        { date: "2026-02-07", weight_lbs: "158.5" },
+        { date: "2026-02-08", weight_lbs: "159.6", injection_date: "2026-02-08", dose: "5mg" },
+        { date: "2026-02-09", weight_lbs: "160.3" },
+        { date: "2026-02-10", weight_lbs: "159.2" },
+        { date: "2026-02-11", weight_lbs: "157.4" },
+        { date: "2026-02-12", weight_lbs: "157.2" },
+        { date: "2026-02-13", weight_lbs: "158.1" },
+        { date: "2026-02-14", weight_lbs: "157.8" },
+      ];
+
+      const rows = rawRows.map((d) => ({
+        date: parseDate(d.date),
+        weight: d.weight_lbs ? +d.weight_lbs : null,
+        injectionDate: d.injection_date ? parseDate(d.injection_date) : null,
+        dose: d.dose || null,
+      }));
+
+      const weights = rows.filter((d) => d.weight != null);
+      const injections = rows.filter((d) => d.injectionDate != null);
+
+      const svg = d3.select("#chart");
+      const tooltip = d3.select("#chart-tooltip");
+      const cardNode = document.querySelector(".card");
+      const width = 1000;
+      const height = 520;
+      const margin = { top: 64, right: 32, bottom: 56, left: 70 };
+
+      const hideTooltip = () => {
+        tooltip.style("opacity", 0).attr("aria-hidden", "true");
+      };
+
+      const positionTooltip = (event) => {
+        const [mouseX, mouseY] = d3.pointer(event, cardNode);
+        const tooltipNode = tooltip.node();
+        const offset = 12;
+        const padding = 8;
+
+        let left = mouseX + offset;
+        let top = mouseY + offset;
+
+        const maxLeft = cardNode.clientWidth - tooltipNode.offsetWidth - padding;
+        const maxTop = cardNode.clientHeight - tooltipNode.offsetHeight - padding;
+
+        left = Math.min(Math.max(padding, left), Math.max(padding, maxLeft));
+        top = Math.min(Math.max(padding, top), Math.max(padding, maxTop));
+
+        tooltip.style("left", `${left}px`).style("top", `${top}px`);
+      };
+
+      const showTooltip = (event, d) => {
+        tooltip
+          .html(`${formatTooltipDate(d.date)}<br>${formatWeight(d.weight)} lbs`)
+          .style("opacity", 1)
+          .attr("aria-hidden", "false");
+        positionTooltip(event);
+      };
+
+      const x = d3
+        .scaleTime()
+        .domain(d3.extent(rows, (d) => d.date))
+        .range([margin.left, width - margin.right]);
+
+      const minWeight = d3.min(weights, (d) => d.weight);
+      const maxWeight = d3.max(weights, (d) => d.weight);
+
+      const y = d3
+        .scaleLinear()
+        .domain([minWeight - 1.2, maxWeight + 1.2])
+        .nice()
+        .range([height - margin.bottom, margin.top]);
+
+      svg
+        .append("g")
+        .attr("class", "grid")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(
+          d3
+            .axisLeft(y)
+            .ticks(6)
+            .tickSize(-(width - margin.left - margin.right))
+            .tickFormat("")
+        );
+
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(
+          d3
+            .axisBottom(x)
+            .ticks(d3.timeWeek.every(1))
+            .tickFormat(formatDate)
+        );
+
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y));
+
+      svg
+        .append("g")
+        .selectAll("line")
+        .data(injections)
+        .join("line")
+        .attr("class", "inj-line")
+        .attr("x1", (d) => x(d.injectionDate))
+        .attr("x2", (d) => x(d.injectionDate))
+        .attr("y1", margin.top)
+        .attr("y2", height - margin.bottom);
+
+      svg
+        .append("g")
+        .selectAll("text")
+        .data(injections)
+        .join("text")
+        .attr("class", "inj-label")
+        .attr("x", (d) => x(d.injectionDate))
+        .attr("y", margin.top - 14)
+        .text((d) => d.dose);
+
+      const line = d3
+        .line()
+        .x((d) => x(d.date))
+        .y((d) => y(d.weight));
+
+      svg
+        .append("path")
+        .datum(weights)
+        .attr("class", "weight-line")
+        .attr("d", line);
+
+      svg
+        .append("g")
+        .selectAll("circle")
+        .data(weights)
+        .join("circle")
+        .attr("class", "weight-dot")
+        .attr("cx", (d) => x(d.date))
+        .attr("cy", (d) => y(d.weight))
+        .attr("r", 2.7);
+
+      svg
+        .append("g")
+        .selectAll("circle")
+        .data(weights)
+        .join("circle")
+        .attr("class", "hover-target")
+        .attr("cx", (d) => x(d.date))
+        .attr("cy", (d) => y(d.weight))
+        .attr("r", 10)
+        .on("mouseenter", (event, d) => showTooltip(event, d))
+        .on("mousemove", (event) => positionTooltip(event))
+        .on("mouseleave", hideTooltip);
+
+      svg.on("mouseleave", hideTooltip);
+
+      svg
+        .append("text")
+        .attr("class", "axis-label")
+        .attr("x", margin.left)
+        .attr("y", margin.top - 36)
+        .text("Weight (lbs)");
+    </script>
   </body>
 </html>

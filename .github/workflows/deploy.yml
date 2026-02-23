@@ -19,43 +19,30 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
 
-      - name: Setup Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
 
-      - name: Install JavaScript dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build JavaScript bundles
-        run: pnpm run build:js
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: true
-
-      - name: Download dependencies
-        run: go mod download
-
-      - name: Run tests
-        run: go test ./...
-
       - name: Build site
-        run: go run ./cmd/sitegen -in src -out html -clean
+        run: pnpm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

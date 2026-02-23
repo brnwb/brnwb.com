@@ -1,21 +1,15 @@
 # build output
 html/
 
-# local dependencies
+# dependencies
 node_modules/
-.pnpm-store/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 pnpm-debug.log*
 
-# generated JS artifacts
-src/_js/zepbound/chart.js
-web/zepbound/weights.generated.js
-
-# Go artifacts
-bin/
-*.test
-*.out
-coverage.out
-.coverprofile
 
 # environment variables
 .env

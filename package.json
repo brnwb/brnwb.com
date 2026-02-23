@@ -1,20 +1,16 @@
 {
-  "name": "brnwb-com-js-build",
+  "name": "brnwb.com",
   "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "build:js": "node ./scripts/build-zepbound.mjs",
-    "watch:js": "node ./scripts/build-zepbound.mjs --watch",
-    "generate:zepbound-data": "node ./scripts/generate-zepbound-data.mjs"
+    "build": "blargh --in src --out html",
+    "dev": "blargh --in src --out html --watch --serve 8080"
   },
   "devDependencies": {
-    "d3-array": "^3.2.4",
-    "d3-axis": "^3.0.0",
-    "d3-format": "^3.1.0",
-    "d3-scale": "^4.0.2",
-    "d3-selection": "^3.0.0",
-    "d3-shape": "^3.2.0",
-    "d3-time": "^3.1.0",
-    "d3-time-format": "^4.1.0",
-    "esbuild": "^0.25.12"
+    "@mariozechner/blargh": "^0.0.26"
   }
 }
