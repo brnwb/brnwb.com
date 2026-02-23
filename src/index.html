@@ -4,54 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Brian Webb</title>
-    <script>
-      (() => {
-        const storageKey = "theme";
-        const root = document.documentElement;
-
-        const getStoredTheme = () => localStorage.getItem(storageKey) || "system";
-        const getSystemTheme = () =>
-          window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
-
-        const applyTheme = (storedTheme) => {
-          root.dataset.theme = storedTheme === "system" ? getSystemTheme() : storedTheme;
-        };
-
-        // Apply theme as early as possible to avoid flash.
-        applyTheme(getStoredTheme());
-
-        document.addEventListener("DOMContentLoaded", () => {
-          const selector = document.querySelector(".theme-selector");
-          const currentTheme = getStoredTheme();
-
-          if (selector) {
-            selector.removeAttribute("hidden");
-            document.querySelectorAll('input[name="theme"]').forEach((input) => {
-              input.checked = input.value === currentTheme;
-              input.addEventListener("change", () => {
-                if (input.value === "system") {
-                  localStorage.removeItem(storageKey);
-                } else {
-                  localStorage.setItem(storageKey, input.value);
-                }
-                applyTheme(getStoredTheme());
-              });
-            });
-          }
-
-          if (window.matchMedia) {
-            const media = window.matchMedia("(prefers-color-scheme: dark)");
-            media.addEventListener("change", () => {
-              if (getStoredTheme() === "system") {
-                applyTheme("system");
-              }
-            });
-          }
-        });
-      })();
-    </script>
+    <script src='{{ asset "theme-switcher.js" }}'></script>
     <link rel="stylesheet" type="text/css" href='{{ asset "style.css" }}' />
   </head>
   <body>

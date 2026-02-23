@@ -1,8 +1,14 @@
 # build output
 html/
 
-# local dependencies (legacy)
+# local dependencies
 node_modules/
+.pnpm-store/
+pnpm-debug.log*
+
+# generated JS artifacts
+src/_js/zepbound/chart.js
+web/zepbound/weights.generated.js
 
 # Go artifacts
 bin/
