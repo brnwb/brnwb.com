@@ -1,0 +1,10 @@
+{
+  "css_bundles": [
+    {
+      "name": "style.css",
+      "inputs": ["_css/colors.css", "_css/elements.css"]
+    }
+  ],
+  "js_bundles": []
+}
+

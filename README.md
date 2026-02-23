@@ -1,19 +1,13 @@
 # brnwb.com
 
-Personal blog site at [www.brnwb.com](https://www.brnwb.com), built with [blargh](https://github.com/badlogic/blargh) and deployed to GitHub Pages.
+Personal blog site at [www.brnwb.com](https://www.brnwb.com), deployed to GitHub Pages.
 
 ## Local development
 
-Install dependencies:
+Run the local dev server (watch + serve):
 
 ```bash
-pnpm install
-```
-
-Run the local dev server (watch mode):
-
-```bash
-pnpm run dev
+go run ./cmd/sitegen -in src -out html -watch -serve 8080
 ```
 
 This builds from `src/` into `html/` and serves on port `8080`.
@@ -23,7 +17,7 @@ This builds from `src/` into `html/` and serves on port `8080`.
 Create a production build:
 
 ```bash
-pnpm run build
+go run ./cmd/sitegen -in src -out html -clean
 ```
 
 Output is written to `html/`.
