@@ -5,6 +5,14 @@
       "inputs": ["_css/colors.css", "_css/elements.css"]
     }
   ],
-  "js_bundles": []
+  "js_bundles": [
+    {
+      "name": "theme-switcher.js",
+      "inputs": ["_js/theme-switcher.js"]
+    },
+    {
+      "name": "zepbound/chart.js",
+      "inputs": ["_js/zepbound/chart.js"]
+    }
+  ]
 }
-
