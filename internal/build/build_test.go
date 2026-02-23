@@ -62,6 +62,7 @@ func TestRunBuildsAssetsAndRendersAssetHelper(t *testing.T) {
 
 	mustWriteFile(t, filepath.Join(inDir, "index.html"), `<link rel="stylesheet" href='{{ asset "style.css" }}' />`)
 	mustWriteFile(t, filepath.Join(inDir, "app.html"), `<script src='{{ asset "app/main.js" }}'></script>`)
+	mustWriteFile(t, filepath.Join(inDir, "nested", "page.html"), `<script src='{{ asset "app/main.js" }}'></script>`)
 
 	err := Run(Config{
 		InDir:  inDir,
@@ -71,8 +72,9 @@ func TestRunBuildsAssetsAndRendersAssetHelper(t *testing.T) {
 		t.Fatalf("Run() error = %v", err)
 	}
 
-	assertFileContains(t, filepath.Join(outDir, "index.html"), `href='style.css'`)
-	assertFileContains(t, filepath.Join(outDir, "app.html"), `src='app/main.js'`)
+	assertFileContains(t, filepath.Join(outDir, "index.html"), `href='/style.css'`)
+	assertFileContains(t, filepath.Join(outDir, "app.html"), `src='/app/main.js'`)
+	assertFileContains(t, filepath.Join(outDir, "nested", "page.html"), `src='/app/main.js'`)
 
 	assertFileContent(t, filepath.Join(outDir, "style.css"), ":root{--bg:#fff;}\nbody{color:#111;}\n")
 	assertFileContent(t, filepath.Join(outDir, "app", "main.js"), "const a = 1;\nconst b = 2;\n")

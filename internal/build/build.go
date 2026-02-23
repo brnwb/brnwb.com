@@ -242,7 +242,11 @@ func (r *templateRenderer) render(templatePath string, stack []string) (string, 
 			if !ok {
 				return "", fmt.Errorf("asset %q not found in manifest", name)
 			}
-			return path, nil
+			assetPath := filepath.ToSlash(strings.TrimSpace(path))
+			if assetPath == "" {
+				return "", fmt.Errorf("asset %q resolves to an empty path", name)
+			}
+			return "/" + strings.TrimPrefix(assetPath, "/"), nil
 		},
 	})
 
