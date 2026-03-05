@@ -18,6 +18,7 @@
         const applyTheme = (storedTheme) => {
           root.dataset.theme = storedTheme === "system" ? getSystemTheme() : storedTheme;
         };
+        // Test
 
         // Apply theme as early as possible to avoid flash.
         applyTheme(getStoredTheme());
