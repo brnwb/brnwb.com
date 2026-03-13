@@ -27,3 +27,8 @@ pnpm run build
 ```
 
 Output is written to `html/`.
+
+## Content License
+
+Unless otherwise noted, the written content published on `brnwb.com` is licensed under
+[Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/).

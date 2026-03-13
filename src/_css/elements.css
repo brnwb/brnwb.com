@@ -98,6 +98,10 @@ footer {
   text-align: right;
 }
 
+p.footer-license {
+  margin: 0 0 0.5rem;
+}
+
 .accent-block {
   border-left: 3px solid var(--accent);
   padding-left: 1rem;
@@ -111,7 +115,7 @@ footer {
 p.theme-selector {
   color: var(--text-secondary);
   font-size: 0.9rem;
-  margin: 1.5rem 0 0;
+  margin: 0;
 }
 
 p.theme-selector input {
